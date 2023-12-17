@@ -12,5 +12,18 @@ void main() {
       expect(games[1]![1], (r: 1, g: 2, b: 6));
       expect(games[1]![2], (r: 0, g: 2, b: 0));
     });
+    test('possibleGame (12,13,14)', () {
+      expect(
+        possibleGame(
+          [
+            (r: 4, g: 0, b: 3),
+            (r: 1, g: 2, b: 6),
+            (r: 0, g: 2, b: 0),
+          ],
+          (r: 12, g: 13, b: 14),
+        ),
+        isTrue,
+      );
+    });
   });
 }
