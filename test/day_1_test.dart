@@ -1,4 +1,4 @@
-import 'package:adventofcode2023/week_1.dart';
+import 'package:adventofcode2023/day_1.dart';
 import 'package:test/test.dart';
 
 final _egLines = '''1abc2
@@ -9,7 +9,7 @@ xyzone23456seven'''
     .split('\n');
 
 void main() {
-  group('Week 1', () {
+  group('Day 1', () {
     test('getNumberAtPos', () {
       expect(getNumberAtPos(_egLines[0], 0), 1);
       expect(getNumberAtPos(_egLines[0], 1), null);

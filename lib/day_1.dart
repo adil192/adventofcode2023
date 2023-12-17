@@ -93,7 +93,7 @@ int? _isWordAtPos(String line, int index) {
 }
 
 Future<int> main() async {
-  final lines = await File('assets/week1.txt').readAsLines();
+  final lines = await File('assets/day_1.txt').readAsLines();
   final calibrationValues = lines.map(getCalibrationValue);
   final sum = calibrationValues.reduce((a, b) => a + b);
   print(sum);
