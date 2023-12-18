@@ -5,7 +5,7 @@ Also see my minor retheme of the Advent of Code website named
 
 #### Directory structure
 
-```
+```python
 .
 ├── assets
 │   └── day_n.txt # Puzzle input for day n
