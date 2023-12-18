@@ -11,22 +11,29 @@ const _egSchematic = r'''467..114..
 ......755.
 ...$.*....
 .664.598..''';
+const _egSchematicPartNumbers = <Coord, int>{
+  (0, 0): 467,
+  (2, 2): 35,
+  (6, 2): 633,
+  (0, 4): 617,
+  (2, 6): 592,
+  (6, 7): 755,
+  (1, 9): 664,
+  (5, 9): 598
+};
 
 void main() {
   group('Day 3', () {
     test('getPartNumbers', () {
       expect(
         getPartNumbers(_egSchematic),
-        <Coord, int>{
-          (0, 0): 467,
-          (2, 2): 35,
-          (6, 2): 633,
-          (0, 4): 617,
-          (2, 6): 592,
-          (6, 7): 755,
-          (1, 9): 664,
-          (5, 9): 598
-        },
+        _egSchematicPartNumbers,
+      );
+    });
+    test('getGearRatios', () {
+      expect(
+        getGearRatios(_egSchematicPartNumbers, _egSchematic).toList(),
+        [467 * 35, 755 * 598],
       );
     });
   });

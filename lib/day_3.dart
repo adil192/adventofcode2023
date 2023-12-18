@@ -43,6 +43,42 @@ Map<Coord, int> getPartNumbers(String schematic) {
   return partNumbers;
 }
 
+Iterable<int> getGearRatios(
+    Map<Coord, int> partNumbers, String schematic) sync* {
+  final lines = schematic.split('\n');
+
+  /// The coordinates of all asterisks (*) in the schematic.
+  List<Coord> asterisks = [];
+  for (int y = 0; y < lines.length; ++y) {
+    for (int x = 0; x < lines[y].length; ++x) {
+      if (lines[y][x] == '*') {
+        asterisks.add((x, y));
+      }
+    }
+  }
+
+  for (final gearCoord in asterisks) {
+    final adjacentParts = partNumbers.keys
+        .where((partCoord) {
+          final dy = (gearCoord.$2 - partCoord.$2).abs();
+          if (dy > 1) return false;
+          final numDigits = partNumbers[partCoord]!.toString().length;
+          for (int x = partCoord.$1; x < partCoord.$1 + numDigits; ++x) {
+            final dx = (gearCoord.$1 - x).abs();
+            if (dx <= 1) return true;
+          }
+          return false;
+        })
+        .map((partCoord) => partNumbers[partCoord]!)
+        .toList();
+    // Gears are asterisks (*) that are adjacent to exactly two part numbers.
+    if (adjacentParts.length != 2) continue;
+    // The gear ratio is the product of the two part numbers.
+    final gearRatio = adjacentParts.reduce((a, b) => a * b);
+    yield gearRatio;
+  }
+}
+
 // Enumerates all the characters adjacent to the number,
 // from the previous line, the current line, and the next line.
 // Note that this includes the number itself.
@@ -63,7 +99,12 @@ bool isDigit(String char) =>
 
 Future<void> main() async {
   final schematic = await File('assets/day_3.txt').readAsString();
+
   final partNumbers = getPartNumbers(schematic);
   final sumOfPartNumbers = partNumbers.values.reduce((a, b) => a + b);
   print('The sum of the part numbers is $sumOfPartNumbers');
+
+  final gearRatios = getGearRatios(partNumbers, schematic);
+  final sumOfGearRatios = gearRatios.reduce((a, b) => a + b);
+  print('The sum of the gear ratios is $sumOfGearRatios');
 }
