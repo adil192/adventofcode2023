@@ -26,14 +26,14 @@ int getCalibrationValue(String line) {
 
   final chars = line.split('');
 
-  String? firstDigit;
-  String? lastDigit;
+  int? firstDigit;
+  int? lastDigit;
 
   // forward search
   for (int i = 0; i < chars.length; i++) {
     final digit = getNumberAtPos(line, i);
     if (digit != null) {
-      firstDigit = digit.toString();
+      firstDigit = digit;
       break;
     }
   }
@@ -41,7 +41,7 @@ int getCalibrationValue(String line) {
   for (int i = chars.length - 1; i >= 0; i--) {
     final digit = getNumberAtPos(line, i);
     if (digit != null) {
-      lastDigit = digit.toString();
+      lastDigit = digit;
       break;
     }
   }
@@ -50,7 +50,7 @@ int getCalibrationValue(String line) {
     throw ArgumentError.value(line, 'line', 'No digits found');
   }
 
-  return int.parse('$firstDigit$lastDigit');
+  return firstDigit * 10 + lastDigit;
 }
 
 /// Checks if [line] contains a number at [index], and returns it.
