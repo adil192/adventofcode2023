@@ -8,11 +8,11 @@ Also see my minor retheme of the Advent of Code website named
 ```
 .
 ├── assets
-│   ├── day_n.txt # Puzzle input for day n
+│   └── day_n.txt # Puzzle input for day n
 ├── lib
-│   ├── day_n.dart # Solution for day n
+│   └── day_n.dart # Solution for day n
 └── test
-    ├── day_n_test.dart # Tests for solution of day n
+    └── day_n_test.dart # Tests for solution of day n
 ```
 
 #### Running the code
