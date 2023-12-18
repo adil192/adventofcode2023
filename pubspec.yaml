@@ -1,10 +1,10 @@
 name: adventofcode2023
-description: A sample command-line application.
+description: My solutions to Advent of Code 2023
 version: 1.0.0
-# repository: https://github.com/my_org/my_repo
+repository: https://github.com/adil192/adventofcode2023
 
 environment:
-  sdk: ^3.2.3
+  sdk: ^3.0.0
 
 # Add regular dependencies here.
 dependencies:
