@@ -30,22 +30,9 @@ Map<Coord, int> getPartNumbers(String schematic) {
         digits.add(nextChar);
       }
 
-      // We'll first get all the characters adjacent to the number,
-      // from the previous line, the current line, and the next line.
-      // Note that this includes the number itself.
-      final adjacentChars = <String>[];
-      for (int y2 = max(0, y - 1); y2 <= y + 1 && y2 < lines.length; ++y2) {
-        adjacentChars.addAll(lines[y2]
-            .substring(
-              max(0, x - 1),
-              min(lines[y2].length, x + digits.length + 1),
-            )
-            .split(''));
-      }
-
       // Now we can check if any of the adjacent characters are symbols.
-      final adjacentToSymbol =
-          adjacentChars.any((char) => char != '.' && !isDigit(char));
+      final adjacentToSymbol = getAdjacentChars(lines, x, y, digits.length)
+          .any((char) => char != '.' && !isDigit(char));
       if (adjacentToSymbol) {
         partNumbers[(x, y)] = int.parse(digits.join());
         x += digits.length - 1;
@@ -54,6 +41,21 @@ Map<Coord, int> getPartNumbers(String schematic) {
   }
 
   return partNumbers;
+}
+
+// Enumerates all the characters adjacent to the number,
+// from the previous line, the current line, and the next line.
+// Note that this includes the number itself.
+Iterable<String> getAdjacentChars(
+    List<String> lines, int x, int y, int numDigits) sync* {
+  for (int y2 = max(0, y - 1); y2 <= y + 1 && y2 < lines.length; ++y2) {
+    yield* lines[y2]
+        .substring(
+          max(0, x - 1),
+          min(lines[y2].length, x + numDigits + 1),
+        )
+        .split('');
+  }
 }
 
 bool isDigit(String char) =>
