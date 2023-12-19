@@ -36,6 +36,35 @@ class Card {
     if (numWins == 0) return 0;
     return pow(2, numWins - 1) as int;
   }
+
+  /// Part 2:
+  /// Returns the count of each card after all the originals and copies
+  /// have been processed.
+  ///
+  /// [originalCards] are assumed to have card 1 at index 0, card 2 at index 1,
+  /// etc.
+  static Map<Card, int> getCopies(List<Card> originalCards) {
+    final toProcess = <Card>[];
+    final numCards = <Card, int>{};
+    for (final card in originalCards) {
+      toProcess.add(card);
+      numCards[card] = 1;
+    }
+
+    while (toProcess.isNotEmpty) {
+      final card = toProcess.removeLast();
+      for (int cardNumber = card.cardNumber + 1;
+          cardNumber <= card.cardNumber + card.numWins &&
+              cardNumber <= originalCards.length;
+          cardNumber++) {
+        final newCard = originalCards[cardNumber - 1];
+        toProcess.add(newCard);
+        numCards[newCard] = (numCards[newCard] ?? 0) + 1;
+      }
+    }
+
+    return numCards;
+  }
 }
 
 Future<void> main() async {
@@ -43,5 +72,9 @@ Future<void> main() async {
   final cards = rawTable.map(Card.fromRawTable).toList();
 
   final totalPoints = cards.map((c) => c.points).reduce((a, b) => a + b);
-  print('Total points: $totalPoints');
+  print('(Part 1) Total points: $totalPoints');
+
+  final numCards = Card.getCopies(cards);
+  final totalCards = numCards.values.reduce((a, b) => a + b);
+  print('(Part 2) Total cards: $totalCards');
 }

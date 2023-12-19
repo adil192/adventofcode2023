@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:adventofcode2023/day_4.dart';
 import 'package:test/test.dart';
 
@@ -17,6 +19,17 @@ void main() {
       expect(card.myNumbers, [83, 86, 6, 31, 17, 9, 48, 53]);
       expect(card.numWins, 4);
       expect(card.points, 8);
+    });
+
+    test('Card.getCopies', () {
+      final cards = _rawTable.split('\n').map(Card.fromRawTable).toList();
+      final copies = Card.getCopies(cards);
+      expect(copies[cards[0]], 1);
+      expect(copies[cards[1]], 2);
+      expect(copies[cards[2]], 4);
+      expect(copies[cards[3]], 8);
+      expect(copies[cards[4]], 14);
+      expect(copies[cards[5]], 1);
     });
   });
 }
