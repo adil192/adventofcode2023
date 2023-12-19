@@ -1,15 +1,23 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:math';
 
 class Almanac {
   factory Almanac.fromFile(List<String> lines) {
-    final firstLine = lines.first;
-    assert(firstLine.startsWith('seeds: '));
-    final seeds = firstLine
+    assert(lines.first.startsWith('seeds: '));
+    final seedsLine = lines.first
         .substring('seeds: '.length)
         .split(' ')
         .map(int.parse)
         .toList();
+    assert(seedsLine.length.isEven);
+    final seedRanges = <(int start, int length)>[];
+    for (int i = 0; i + 1 < seedsLine.length; i += 2) {
+      final startOfRange = seedsLine[i];
+      final lengthOfRange = seedsLine[i + 1];
+      seedRanges.add((startOfRange, lengthOfRange));
+    }
+
     final maps = <String, AlmanacMap>{};
     final currentMapLines = <String>[];
     for (final line in lines.skip(2)) {
@@ -25,13 +33,14 @@ class Almanac {
       final map = AlmanacMap.fromLines(currentMapLines);
       maps[map.categoryFrom] = map;
     }
-    return Almanac._(seeds, maps);
+
+    return Almanac._(seedRanges, maps);
   }
 
-  const Almanac._(this.seeds, this.maps);
+  const Almanac._(this.seedRanges, this.maps);
 
   /// The seeds that need to be planted
-  final List<int> seeds;
+  final List<(int start, int length)> seedRanges;
 
   /// The list of maps from one category to another,
   /// indexed by the category from.
@@ -124,7 +133,29 @@ Future<void> main() async {
   final input = await File('assets/day_5.txt').readAsString();
   final almanac = Almanac.fromFile(input.split('\n'));
 
-  final seedLocations = almanac.seeds.map(almanac.convertSeedToLocation);
-  final smallestLocation = seedLocations.reduce(min);
-  print('(Part 1) Smallest location: $smallestLocation');
+  // I had to use multiple threads to get this to run in about 2 minutes,
+  // but the challenge is supposed to be able to be solved in 15 seconds.
+  final isolates = <Future<int>>[];
+  for (final seedRange in almanac.seedRanges) {
+    isolates.add(Isolate.run(() {
+      int minLocation = almanac.convertSeedToLocation(seedRange.$1);
+
+      final start = seedRange.$1;
+      final length = seedRange.$2;
+      for (int i = 1; i < length; i++) {
+        final seed = start + i;
+        final location = almanac.convertSeedToLocation(seed);
+        if (location < minLocation) {
+          minLocation = location;
+        }
+      }
+
+      return minLocation;
+    }));
+  }
+  print('Spawned ${isolates.length} isolates.');
+
+  final minLocations = await Future.wait(isolates);
+  final minLocation = minLocations.reduce(min);
+  print('(Part 2) Smallest location: $minLocation');
 }

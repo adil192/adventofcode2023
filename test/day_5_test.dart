@@ -8,7 +8,10 @@ void main() {
       almanac = Almanac.fromFile(_egInput.split('\n'));
     });
     test('Parse input', () {
-      expect(almanac.seeds, [79, 14, 55, 13]);
+      expect(almanac.seedRanges, [
+        (79, 14),
+        (55, 13),
+      ]);
       expect(almanac.maps.keys, [
         'seed',
         'soil',
