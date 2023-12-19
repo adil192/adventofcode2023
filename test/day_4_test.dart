@@ -12,6 +12,7 @@ void main() {
   group('Day 4', () {
     test('Card.fromRawTable', () {
       final card = Card.fromRawTable(_rawTable.split('\n').first);
+      expect(card.cardNumber, 1);
       expect(card.winningNumbers, [41, 48, 83, 86, 17]);
       expect(card.myNumbers, [83, 86, 6, 31, 17, 9, 48, 53]);
       expect(card.numWins, 4);

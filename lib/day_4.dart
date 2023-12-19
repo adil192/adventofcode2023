@@ -2,28 +2,37 @@ import 'dart:io';
 import 'dart:math';
 
 class Card {
-  Card(this.winningNumbers, this.myNumbers);
+  Card(this.cardNumber, this.winningNumbers, this.myNumbers);
 
   factory Card.fromRawTable(String line) {
-    // First remove the "Card 0: " prefix, since we don't need it.
-    line = line.substring(line.indexOf(':') + 2);
-    final [winningString, myString] = line.split(' | ');
-    final winningNumbers =
-        winningString.trim().split(RegExp(r' +')).map(int.parse).toList();
-    final myNumbers =
-        myString.trim().split(RegExp(r' +')).map(int.parse).toList();
-    return Card(winningNumbers, myNumbers);
+    // First get the "Card 0: " prefix
+    final [id, lineWithoutId] = line.split(':');
+    final cardNumber = int.parse(id.split(' ').last);
+
+    final [winningString, myString] = lineWithoutId.split('|');
+    final winningNumbers = winningString
+        .trim()
+        .split(RegExp(r' +'))
+        .map(int.parse)
+        .toList(growable: false);
+    final myNumbers = myString
+        .trim()
+        .split(RegExp(r' +'))
+        .map(int.parse)
+        .toList(growable: false);
+
+    return Card(cardNumber, winningNumbers, myNumbers);
   }
 
+  final int cardNumber;
   final List<int> winningNumbers;
   final List<int> myNumbers;
 
-  int get numWins {
-    return winningNumbers.where((n) => myNumbers.contains(n)).length;
-  }
+  late final numWins =
+      winningNumbers.where((n) => myNumbers.contains(n)).length;
 
+  /// Part 1 only
   int get points {
-    final numWins = this.numWins;
     if (numWins == 0) return 0;
     return pow(2, numWins - 1) as int;
   }
