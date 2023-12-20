@@ -3,7 +3,9 @@ import 'dart:io';
 class Record {
   const Record(this.msLimit, this.recordDistance);
 
-  static Iterable<Record> fromFile(String input) sync* {
+  /// (Part 1)
+  /// Parses multiple records that are separated by spaces.
+  static Iterable<Record> fromFileMultiple(String input) sync* {
     var [timeLine, distanceLine] = input.split('\n');
 
     assert(timeLine.startsWith('Time:'));
@@ -19,6 +21,21 @@ class Record {
     for (var i = 0; i < times.length; i++) {
       yield Record(times[i], distances[i]);
     }
+  }
+
+  /// (Part 2)
+  /// Parses one race, disregarding the spaces between digits.
+  static Record fromFileSingle(String input) {
+    var [timeLine, distanceLine] = input.split('\n');
+
+    final whitespace = RegExp(r'\s+');
+    assert(timeLine.startsWith('Time:'));
+    assert(distanceLine.startsWith('Distance:'));
+    timeLine = timeLine.substring('Time:'.length).replaceAll(whitespace, '');
+    distanceLine =
+        distanceLine.substring('Distance:'.length).replaceAll(whitespace, '');
+
+    return Record(int.parse(timeLine), int.parse(distanceLine));
   }
 
   final int msLimit;
@@ -50,7 +67,9 @@ extension RecordList on List<Record> {
 
 Future<void> main() async {
   final input = await File('assets/day_6.txt').readAsString();
-  final records = Record.fromFile(input).toList();
+  final records = Record.fromFileMultiple(input).toList();
+  final singleRecord = Record.fromFileSingle(input);
 
   print('Part 1: ${records.waysToWinProduct()}');
+  print('Part 2: ${singleRecord.waysToWin()}');
 }

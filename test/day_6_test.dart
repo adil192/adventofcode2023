@@ -7,11 +7,13 @@ Distance:  9  40  200''';
 void main() {
   group('Day 6', () {
     late final List<Record> records;
+    late final Record singleRecord;
     setUpAll(() {
-      records = Record.fromFile(_egInput).toList();
+      records = Record.fromFileMultiple(_egInput).toList();
+      singleRecord = Record.fromFileSingle(_egInput);
     });
 
-    test('Record.fromFile', () {
+    test('Record.fromFileMultiple', () {
       expect(records.length, 3);
       expect(records[0].msLimit, 7);
       expect(records[0].recordDistance, 9);
@@ -19,6 +21,11 @@ void main() {
       expect(records[1].recordDistance, 40);
       expect(records[2].msLimit, 30);
       expect(records[2].recordDistance, 200);
+    });
+
+    test('Record.fromFileSingle', () {
+      expect(singleRecord.msLimit, 71530);
+      expect(singleRecord.recordDistance, 940200);
     });
 
     test('Record.distanceWhenHeldDown', () {
