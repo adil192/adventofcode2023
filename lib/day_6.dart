@@ -1,0 +1,56 @@
+import 'dart:io';
+
+class Record {
+  const Record(this.msLimit, this.recordDistance);
+
+  static Iterable<Record> fromFile(String input) sync* {
+    var [timeLine, distanceLine] = input.split('\n');
+
+    assert(timeLine.startsWith('Time:'));
+    assert(distanceLine.startsWith('Distance:'));
+    timeLine = timeLine.substring('Time:'.length).trim();
+    distanceLine = distanceLine.substring('Distance:'.length).trim();
+
+    final whitespace = RegExp(r'\s+');
+    final times = timeLine.split(whitespace).map(int.parse).toList();
+    final distances = distanceLine.split(whitespace).map(int.parse).toList();
+
+    assert(times.length == distances.length);
+    for (var i = 0; i < times.length; i++) {
+      yield Record(times[i], distances[i]);
+    }
+  }
+
+  final int msLimit;
+  final int recordDistance;
+
+  int waysToWin() {
+    int waysToWin = 0;
+    for (int msHeldDown = 1; msHeldDown < msLimit; msHeldDown++) {
+      if (distanceWhenHeldDown(msHeldDown) > recordDistance) {
+        waysToWin++;
+      }
+    }
+    return waysToWin;
+  }
+
+  int distanceWhenHeldDown(int msHeldDown) {
+    assert(msHeldDown >= 0);
+    assert(msHeldDown <= msLimit);
+    final speed = msHeldDown;
+    final timeLeft = msLimit - msHeldDown;
+    return speed * timeLeft;
+  }
+}
+
+extension RecordList on List<Record> {
+  int waysToWinProduct() =>
+      fold(1, (ways, record) => ways * record.waysToWin());
+}
+
+Future<void> main() async {
+  final input = await File('assets/day_6.txt').readAsString();
+  final records = Record.fromFile(input).toList();
+
+  print('Part 1: ${records.waysToWinProduct()}');
+}
