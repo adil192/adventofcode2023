@@ -18,10 +18,16 @@ void main() {
       expect(input[2], [10, 13, 16, 21, 30, 45]);
     });
 
-    test('extrapolate', () {
-      expect(extrapolate(input[0]), 18);
-      expect(extrapolate(input[1]), 28);
-      expect(extrapolate(input[2]), 68);
+    test('extrapolateNext', () {
+      expect(extrapolateNext(input[0]), 18);
+      expect(extrapolateNext(input[1]), 28);
+      expect(extrapolateNext(input[2]), 68);
+    });
+
+    test('extrapolatePrev', () {
+      expect(extrapolatePrev(input[0]), -3);
+      expect(extrapolatePrev(input[1]), 0);
+      expect(extrapolatePrev(input[2]), 5);
     });
   });
 }

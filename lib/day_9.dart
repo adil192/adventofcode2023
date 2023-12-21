@@ -4,10 +4,10 @@ List<int> parseInput(String line) {
   return line.split(' ').map(int.parse).toList(growable: false);
 }
 
-int extrapolate(List<int> history) {
-  /// deltas[0] is the original history list,
-  /// deltas[1] is the difference between each element in deltas[0],
-  /// deltas[2] is the difference between each element in deltas[1], etc.
+/// deltas[0] is the original history list,
+/// deltas[1] is the difference between each element in deltas[0],
+/// deltas[2] is the difference between each element in deltas[1], etc.
+List<List<int>> findDeltas(List<int> history) {
   final deltas = <List<int>>[
     history,
   ];
@@ -20,9 +20,18 @@ int extrapolate(List<int> history) {
     }
     deltas.add(next);
   }
+  return deltas;
+}
 
-  // The extrapolated value is the sum of the last element in each delta list.
-  return deltas.map((delta) => delta.last).reduce((a, b) => a + b);
+int extrapolateNext(List<int> history) {
+  final deltas = findDeltas(history);
+  return deltas.fold(0, (sum, delta) => delta.last + sum);
+}
+
+// TODO(adil192): This passes the tests, but gives the wrong answer.
+int extrapolatePrev(List<int> history) {
+  final deltas = findDeltas(history);
+  return deltas.fold(0, (sum, delta) => delta.first - sum);
 }
 
 Future<void> main() async {
@@ -30,7 +39,11 @@ Future<void> main() async {
       .readAsLines()
       .then((lines) => lines.map(parseInput).toList(growable: false));
 
-  final extrapolated = input.map(extrapolate);
-  final extrapolatedSum = extrapolated.reduce((a, b) => a + b);
-  print('Sum of extrapolated values: $extrapolatedSum');
+  final nexts = input.map(extrapolateNext);
+  final sumOfNexts = nexts.reduce((a, b) => a + b);
+  print('Sum of next values: $sumOfNexts');
+
+  final prevs = input.map(extrapolatePrev);
+  final sumOfPrevs = prevs.reduce((a, b) => a + b);
+  print('Sum of prev values: $sumOfPrevs');
 }
