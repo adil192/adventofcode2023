@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:trotter/trotter.dart';
+
 class Hand implements Comparable<Hand> {
   /// Initializes a hand with the string representation of 5 cards.
   /// Each character can be A, K, Q, T, 9, 8, 7, 6, 5, 4, 3, 2, or J.
@@ -38,6 +40,8 @@ class Hand implements Comparable<Hand> {
     for (final card in cards) {
       cardCountsMap[card] = (cardCountsMap[card] ?? 0) + 1;
     }
+
+    /// Jokers can change into any card to get the best hand type.
     final numJokers = cardCountsMap[1]!;
 
     /// A list of the counts of each card,
@@ -46,7 +50,13 @@ class Hand implements Comparable<Hand> {
       ..remove(numJokers)
       ..add(0);
 
-    /// Jokers can change into any card to get the best hand type.
+    if (cardCounts.any((count) => count >= 5 - numJokers)) {
+      return HandType.fiveOfAKind;
+    }
+    if (cardCounts.any((count) => count >= 4 - numJokers)) {
+      return HandType.fourOfAKind;
+    }
+
     HandType bestHandType = HandType.highCard;
     void setBestHandType(HandType handType) {
       if (handType.strength > bestHandType.strength) {
@@ -54,44 +64,20 @@ class Hand implements Comparable<Hand> {
       }
     }
 
-    for (int jokers = 0; jokers <= numJokers; ++jokers) {
-      if (cardCounts.contains(5 - jokers)) {
-        setBestHandType(HandType.fiveOfAKind);
-        break;
-      }
-      if (cardCounts.contains(4 - jokers)) {
-        setBestHandType(HandType.fourOfAKind);
-      }
-      // A full house is made with 3 of a kind + 2 of a kind,
-      // so we need another loop to split the jokers between these
-      // two counts.
-      for (int j = 0; j <= jokers; ++j) {
-        if (cardCounts.contains(3 - j) &&
-            cardCounts.contains(2 - (jokers - j))) {
-          setBestHandType(HandType.fullHouse);
-        }
-      }
-      if (cardCounts.contains(3 - jokers)) {
+    /// We now go through all the possible card counts
+    /// where the jokers can be any card.
+    for (final cardCounts in getAllPossibleCardCounts(
+      numJokers,
+      _cardStrengths.values,
+      cardCountsMap,
+    )) {
+      if (cardCounts.contains(3) && cardCounts.contains(2)) {
+        setBestHandType(HandType.fullHouse);
+      } else if (cardCounts.contains(3)) {
         setBestHandType(HandType.threeOfAKind);
-      }
-      // A two pair is made with 2 of a kind + 2 of a kind,
-      // so we need another loop to split the jokers between these
-      // two counts.
-      for (int j = 0; j <= jokers; ++j) {
-        if (j == jokers - j) {
-          // We need to check that there both pairs not just one.
-          if (!cardCounts.contains(2 - j)) continue;
-          if (cardCounts.where((count) => count == 2 - j).length >= 2) {
-            setBestHandType(HandType.twoPair);
-          }
-        } else {
-          if (cardCounts.contains(2 - j) &&
-              cardCounts.contains(2 - (jokers - j))) {
-            setBestHandType(HandType.twoPair);
-          }
-        }
-      }
-      if (cardCounts.contains(2 - jokers)) {
+      } else if (cardCounts.where((count) => count == 2).length >= 2) {
+        setBestHandType(HandType.twoPair);
+      } else if (cardCounts.contains(2)) {
         setBestHandType(HandType.onePair);
       }
     }
@@ -171,6 +157,39 @@ enum HandType {
   const HandType(this.strength);
 
   final int strength;
+}
+
+/// Returns all possible card counts for each combination of jokers,
+/// which can be substituted for any card.
+Iterable<List<int>> getAllPossibleCardCounts(
+  int numJokers,
+  Iterable<int> allCards,
+  Map<int, int> cardCounts,
+) sync* {
+  if (numJokers == 0) {
+    yield cardCounts.values.toList();
+    return;
+  } else {
+    // Set the joker count to 0 so we don't have duplicates in the for loop.
+    cardCounts[Hand._cardStrengths['J']!] = 0;
+  }
+
+  /// The list of all cards where each card is repeated [numJokers] times.
+  final possibleJokers = List.generate(numJokers, (index) => allCards.toList())
+      .fold([], (union, element) => union..addAll(element));
+
+  /// We have to use the indexes of [possibleJokers] since duplicates aren't allowed.
+  final combinations =
+      Combinations(numJokers, List.generate(possibleJokers.length, (i) => i));
+
+  for (final combination in combinations()) {
+    final newCardCounts = Map<int, int>.from(cardCounts);
+    for (final cardIndex in combination) {
+      final card = possibleJokers[cardIndex];
+      newCardCounts[card] = (newCardCounts[card] ?? 0) + 1;
+    }
+    yield newCardCounts.values.toList();
+  }
 }
 
 Future<void> main() async {
