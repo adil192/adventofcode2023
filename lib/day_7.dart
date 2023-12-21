@@ -2,9 +2,9 @@ import 'dart:io';
 
 class Hand implements Comparable<Hand> {
   /// Initializes a hand with the string representation of 5 cards.
-  /// Each character can be A, K, Q, J, T, 9, 8, 7, 6, 5, 4, 3, or 2.
+  /// Each character can be A, K, Q, T, 9, 8, 7, 6, 5, 4, 3, 2, or J.
   /// The relative strength of each card follows this order,
-  /// where A is the highest and 2 is the lowest.
+  /// where A is the highest and J is the lowest.
   Hand(String hand, {required this.bet}) {
     assert(hand.length == 5);
     final cards = hand.split('');
@@ -23,7 +23,7 @@ class Hand implements Comparable<Hand> {
 
   /// A fixed length list of 5 cards, populated in the constructor.
   /// Each card is represented by its relative strength,
-  /// where A (14) is the highest and 2 is the lowest.
+  /// where A (13) is the highest and 2 is the lowest.
   final List<int> cards = List.filled(5, 0);
 
   late final handType = _getHandType();
@@ -32,30 +32,71 @@ class Hand implements Comparable<Hand> {
   final int bet;
 
   HandType _getHandType() {
-    final cardCounts = <int, int>{};
+    final cardCountsMap = <int, int>{
+      1: 0, // Make sure jokers are included in the map.
+    };
     for (final card in cards) {
-      cardCounts[card] = (cardCounts[card] ?? 0) + 1;
+      cardCountsMap[card] = (cardCountsMap[card] ?? 0) + 1;
+    }
+    final numJokers = cardCountsMap[1]!;
+
+    /// A list of the counts of each card,
+    /// excluding the count of jokers which is replaced with 0.
+    final cardCounts = cardCountsMap.values.toList()
+      ..remove(numJokers)
+      ..add(0);
+
+    /// Jokers can change into any card to get the best hand type.
+    HandType bestHandType = HandType.highCard;
+    void setBestHandType(HandType handType) {
+      if (handType.strength > bestHandType.strength) {
+        bestHandType = handType;
+      }
     }
 
-    if (cardCounts.containsValue(5)) {
-      return HandType.fiveOfAKind;
+    for (int jokers = 0; jokers <= numJokers; ++jokers) {
+      if (cardCounts.contains(5 - jokers)) {
+        setBestHandType(HandType.fiveOfAKind);
+        break;
+      }
+      if (cardCounts.contains(4 - jokers)) {
+        setBestHandType(HandType.fourOfAKind);
+      }
+      // A full house is made with 3 of a kind + 2 of a kind,
+      // so we need another loop to split the jokers between these
+      // two counts.
+      for (int j = 0; j <= jokers; ++j) {
+        if (cardCounts.contains(3 - j) &&
+            cardCounts.contains(2 - (jokers - j))) {
+          setBestHandType(HandType.fullHouse);
+        }
+      }
+      if (cardCounts.contains(3 - jokers)) {
+        setBestHandType(HandType.threeOfAKind);
+      }
+      // A two pair is made with 2 of a kind + 2 of a kind,
+      // so we need another loop to split the jokers between these
+      // two counts.
+      for (int j = 0; j <= jokers; ++j) {
+        if (j == jokers - j) {
+          // We need to check that there both pairs not just one.
+          if (!cardCounts.contains(2 - j)) continue;
+          if (cardCounts.where((count) => count == 2 - j).length >= 2) {
+            setBestHandType(HandType.twoPair);
+          }
+        } else {
+          if (cardCounts.contains(2 - j) &&
+              cardCounts.contains(2 - (jokers - j))) {
+            setBestHandType(HandType.twoPair);
+          }
+        }
+      }
+      if (cardCounts.contains(2 - jokers)) {
+        setBestHandType(HandType.onePair);
+      }
     }
-    if (cardCounts.containsValue(4)) {
-      return HandType.fourOfAKind;
-    }
-    if (cardCounts.containsValue(3) && cardCounts.containsValue(2)) {
-      return HandType.fullHouse;
-    }
-    if (cardCounts.containsValue(3)) {
-      return HandType.threeOfAKind;
-    }
-    if (cardCounts.values.where((count) => count == 2).length == 2) {
-      return HandType.twoPair;
-    }
-    if (cardCounts.containsValue(2)) {
-      return HandType.onePair;
-    }
-    return HandType.highCard;
+
+    return bestHandType;
   }
 
   @override
@@ -101,10 +142,9 @@ class Hand implements Comparable<Hand> {
 
   /// Maps each card to its relative strength.
   static const _cardStrengths = <String, int>{
-    'A': 14,
-    'K': 13,
-    'Q': 12,
-    'J': 11,
+    'A': 13,
+    'K': 12,
+    'Q': 11,
     'T': 10,
     '9': 9,
     '8': 8,
@@ -114,6 +154,7 @@ class Hand implements Comparable<Hand> {
     '4': 4,
     '3': 3,
     '2': 2,
+    'J': 1,
   };
 }
 
