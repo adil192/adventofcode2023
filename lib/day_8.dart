@@ -45,10 +45,29 @@ class DesertMap {
     var steps = 0;
     var currentNode = 'AAA';
     while (currentNode != 'ZZZ') {
-      final (left, right) = network[currentNode]!;
       final direction = getDirection(steps);
+      ++steps;
+      final (left, right) = network[currentNode]!;
       currentNode = direction == Direction.left ? left : right;
-      steps++;
+    }
+    return steps;
+  }
+
+  /// Returns how many steps it takes to get from
+  /// all nodes ending in A to all nodes ending in Z.
+  int ghostStepsFromAToZ() {
+    var steps = 0;
+    final currentNodes =
+        network.keys.where((node) => node.endsWith('A')).toList();
+    while (currentNodes.any((element) => !element.endsWith('Z'))) {
+      final direction = getDirection(steps);
+      ++steps;
+      for (int i = 0; i < currentNodes.length; ++i) {
+        final node = currentNodes[i];
+        final (left, right) = network[node]!;
+        final nextNode = direction == Direction.left ? left : right;
+        currentNodes[i] = nextNode;
+      }
     }
     return steps;
   }
@@ -61,4 +80,7 @@ Future<void> main() async {
   final map = DesertMap.fromInput(input);
 
   print('It takes ${map.stepsFromAAAtoZZZ()} steps to get from AAA to ZZZ.');
+
+  print(
+      'It takes ${map.ghostStepsFromAToZ()} ghost steps to get from **A to **Z.');
 }
