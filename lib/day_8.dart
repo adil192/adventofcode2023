@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:dart_numerics/dart_numerics.dart';
+
 class DesertMap {
   factory DesertMap.fromInput(List<String> lines) {
     assert(RegExp(r'[RL]+').hasMatch(lines.first));
@@ -40,11 +42,11 @@ class DesertMap {
   }
 
   /// Returns how many steps it takes to get from
-  /// AAA to ZZZ.
-  int stepsFromAAAtoZZZ() {
+  /// [startNode] to a node that satisfies [success].
+  int _stepsFromStart(String startNode, bool Function(String) success) {
     var steps = 0;
-    var currentNode = 'AAA';
-    while (currentNode != 'ZZZ') {
+    var currentNode = startNode;
+    while (!success(currentNode)) {
       final direction = getDirection(steps);
       ++steps;
       final (left, right) = network[currentNode]!;
@@ -54,22 +56,17 @@ class DesertMap {
   }
 
   /// Returns how many steps it takes to get from
+  /// AAA to ZZZ.
+  int stepsFromAAAtoZZZ() => _stepsFromStart('AAA', (node) => node == 'ZZZ');
+
+  /// Returns how many steps it takes to get from
   /// all nodes ending in A to all nodes ending in Z.
-  int ghostStepsFromAToZ() {
-    var steps = 0;
-    final currentNodes =
-        network.keys.where((node) => node.endsWith('A')).toList();
-    while (currentNodes.any((element) => !element.endsWith('Z'))) {
-      final direction = getDirection(steps);
-      ++steps;
-      for (int i = 0; i < currentNodes.length; ++i) {
-        final node = currentNodes[i];
-        final (left, right) = network[node]!;
-        final nextNode = direction == Direction.left ? left : right;
-        currentNodes[i] = nextNode;
-      }
-    }
-    return steps;
+  int ghostStepsFromAsToZs() {
+    final individualNodeSteps = network.keys
+        .where((node) => node.endsWith('A'))
+        .map((node) => _stepsFromStart(node, (node) => node.endsWith('Z')))
+        .toList(growable: false);
+    return leastCommonMultipleOfMany(individualNodeSteps);
   }
 }
 
@@ -82,5 +79,5 @@ Future<void> main() async {
   print('It takes ${map.stepsFromAAAtoZZZ()} steps to get from AAA to ZZZ.');
 
   print(
-      'It takes ${map.ghostStepsFromAToZ()} ghost steps to get from **A to **Z.');
+      'It takes ${map.ghostStepsFromAsToZs()} ghost steps to get from **A to **Z.');
 }

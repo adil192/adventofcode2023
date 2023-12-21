@@ -82,7 +82,7 @@ void main() {
     });
 
     test('ghostStepsFromAToZ', () {
-      expect(map3.ghostStepsFromAToZ(), 6);
+      expect(map3.ghostStepsFromAsToZs(), 6);
     });
   });
 }
