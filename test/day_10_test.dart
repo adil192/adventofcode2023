@@ -31,18 +31,37 @@ void main() {
       pipes2Clean = Pipes.fromInput(_egInput2Clean.split('\n'));
       pipes2Cluttered = Pipes.fromInput(_egInput2Cluttered.split('\n'));
     });
+
     test('Pipes.fromInput', () {
       expect(pipes1Clean.pipes.length, 5);
       expect(pipes1Clean.pipes[0].length, 5);
       expect(pipes1Clean.pipes[0][0], Pipe.ground);
       expect(pipes1Clean.pipes[1][1], Pipe.start);
       expect(pipes1Clean.startIndex, (1, 1));
+      expect(pipes1Cluttered.startIndex, pipes1Clean.startIndex);
 
       expect(pipes2Cluttered.pipes.length, 5);
       expect(pipes2Cluttered.pipes[0].length, 5);
       expect(pipes2Cluttered.pipes[0][0], Pipe.sw);
       expect(pipes2Cluttered.pipes[2][0], Pipe.start);
       expect(pipes2Cluttered.startIndex, (2, 0));
+      expect(pipes2Cluttered.startIndex, pipes2Clean.startIndex);
+    });
+
+    test('findMainLoop of loop 1', () {
+      final loop1Clean = pipes1Clean.findMainLoop();
+      final loop1Cluttered = pipes1Cluttered.findMainLoop();
+      expect(loop1Clean, [
+        (1, 1),
+        (1, 2),
+        (1, 3),
+        (2, 3),
+        (3, 3),
+        (3, 2),
+        (3, 1),
+        (2, 1),
+      ]);
+      expect(loop1Cluttered, loop1Clean);
     });
   });
 }
