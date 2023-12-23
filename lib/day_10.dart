@@ -1,3 +1,5 @@
+import 'dart:io';
+
 typedef Pos = (int row, int col);
 
 class Pipes {
@@ -133,6 +135,11 @@ class Pipes {
     }
     return loop;
   }
+
+  int stepsFurthestFromStart() {
+    final mainLoop = findMainLoop();
+    return (mainLoop.length / 2).floor();
+  }
 }
 
 enum Pipe {
@@ -167,4 +174,11 @@ enum Direction {
   east,
   south,
   west,
+}
+
+Future<void> main() async {
+  final input = await File('assets/day_10.txt').readAsLines();
+  final pipes = Pipes.fromInput(input);
+  print(
+      'It takes ${pipes.stepsFurthestFromStart()} steps to reach the furthest node from the start node.');
 }

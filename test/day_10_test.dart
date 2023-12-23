@@ -63,5 +63,36 @@ void main() {
       ]);
       expect(loop1Cluttered, loop1Clean);
     });
+
+    test('findMainLoop of loop 2', () {
+      final loop2Clean = pipes2Clean.findMainLoop();
+      final loop2Cluttered = pipes2Cluttered.findMainLoop();
+      expect(loop2Clean, [
+        (2, 0),
+        (2, 1),
+        (1, 1),
+        (1, 2),
+        (0, 2),
+        (0, 3),
+        (1, 3),
+        (2, 3),
+        (2, 4),
+        (3, 4),
+        (3, 3),
+        (3, 2),
+        (3, 1),
+        (4, 1),
+        (4, 0),
+        (3, 0),
+      ]);
+      expect(loop2Cluttered, loop2Clean);
+    });
+
+    test('stepsFurthestFromStart', () {
+      expect(pipes1Clean.stepsFurthestFromStart(), 4);
+      expect(pipes1Cluttered.stepsFurthestFromStart(), 4);
+      expect(pipes2Clean.stepsFurthestFromStart(), 8);
+      expect(pipes2Cluttered.stepsFurthestFromStart(), 8);
+    });
   });
 }
